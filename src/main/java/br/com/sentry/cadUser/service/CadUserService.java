@@ -1,15 +1,15 @@
 package br.com.sentry.cadUser.service;
 
-import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.List;
 
 import javax.security.auth.login.AccountNotFoundException;
 import javax.xml.bind.ValidationException;
 
+import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.sentry.cadUser.DTO.CadUserDTO;
@@ -25,22 +25,14 @@ public class CadUserService {
 	private CadUserRepository repository;
 	
 	
-	public String encodePassword(String password) {
-		 int strength = 10; // work factor of bcrypt
-		 BCryptPasswordEncoder bCryptPasswordEncoder =
-		  new BCryptPasswordEncoder(strength, new SecureRandom());
-		 
-		 return bCryptPasswordEncoder.encode(password);
-	}
-	
 	public void saveOrUpdate(CadUserDTO cadUsuarioDto)throws Exception {
 		try {
-			if(!cadUsuarioDto.getDcrSenha().matches("^(?=.*[!#@$%&])(?=.*[0-9])(?=.*[a-z]).{8,}$")) {
+			if(!cadUsuarioDto.getSenha().matches("^(?=.*[!#@$%&])(?=.*[0-9])(?=.*[a-z]).{8,}$")) {
 				throw new ValidationException("invalidPassword");
 			}
-
-			CadUser userExists = repository.findByLogin(cadUsuarioDto.getDcrLogin());
+			CadUser userExists = repository.findByLogin(cadUsuarioDto.getLogin());
 	
+			System.out.println(userExists);
 			if(userExists != null) {
 				throw new ValidationException("UserExist");
 			}
@@ -56,9 +48,9 @@ public class CadUserService {
 			
 			CadUser user = new CadUser();
 			
-			user.setUsuario(cadUsuarioDto.getDcrUsuario());
-			user.setLogin(cadUsuarioDto.getDcrLogin());
-			user.setSenha(cadUsuarioDto.getDcrSenha());
+			user.setUsuario(cadUsuarioDto.getUsuario());
+			user.setLogin(cadUsuarioDto.getLogin());
+			user.setSenha(cadUsuarioDto.getSenha());
 			user.setDatCadastro(LocalDate.now());
 			user.setDatDesativacao(disabledDate);
 			
@@ -80,7 +72,7 @@ public class CadUserService {
 				throw new AccountNotFoundException("LoginNotFound");
 			}
 			
-			if(!cadUsuarioDto.getDcrSenha().matches("^(?=.*[!#@$%&])(?=.*[0-9])(?=.*[a-z]).{8,}$")) {
+			if(!cadUsuarioDto.getSenha().matches("^(?=.*[!#@$%&])(?=.*[0-9])(?=.*[a-z]).{8,}$")) {
 				throw new ValidationException("invalidPassword");
 			}
 			
@@ -93,9 +85,9 @@ public class CadUserService {
 				disabledDate = LocalDate.now();
 			}
 			
-			user.setUsuario(cadUsuarioDto.getDcrUsuario());
-			user.setLogin(cadUsuarioDto.getDcrLogin());
-			user.setSenha(encodePassword(cadUsuarioDto.getDcrSenha()));
+			user.setUsuario(cadUsuarioDto.getUsuario());
+			user.setLogin(cadUsuarioDto.getLogin());
+			user.setSenha(cadUsuarioDto.getSenha());
 			user.setDatCadastro(LocalDate.now());
 			user.setDatDesativacao(disabledDate);
 			
@@ -108,12 +100,33 @@ public class CadUserService {
 	
 	public List<CadUser> findAll(){
 		repository.flush();
-		return repository.findAll(Sort.by("idCadUsuario"));
+		return repository.findAll(Sort.by("idUsuario"));
 	}
 	
 	
 	public void deleteUser(Integer id) {
 		repository.deleteById(id);;
+	}
+	
+	public void login(String login, String password)throws NotFoundException, InvalidContentTypeException, Exception {
+		try {
+
+			if(login.isBlank()|| password.isBlank()) {
+				throw new InvalidContentTypeException();
+			}
+		
+			if(repository.findByLoginAndSenha(login, password) == null) {
+				throw new NotFoundException();
+			}
+		}catch(InvalidContentTypeException e) {
+			throw new InvalidContentTypeException(e.getMessage());
+		}catch(NotFoundException e) {
+			throw new NotFoundException();
+		}catch(Exception e) {
+			throw new Exception(e);
+
+		}
+		
 	}
 
 }
