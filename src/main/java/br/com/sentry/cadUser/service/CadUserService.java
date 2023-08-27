@@ -2,6 +2,8 @@ package br.com.sentry.cadUser.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.security.auth.login.AccountNotFoundException;
 import javax.xml.bind.ValidationException;
@@ -24,15 +26,39 @@ public class CadUserService {
 	@Autowired
 	private CadUserRepository repository;
 	
+	public String hideCpf(String cpf) {
+		Pattern pattern = Pattern.compile("(^\\d{3}\\x2E\\d{3}\\x2E\\d{3}\\x2D\\d{2}$)");
+		Matcher matcher = pattern.matcher(cpf);
+		String cpfMasked = "";
+		if(matcher.find()) {
+			String cpfOnlyNumber = cpf.replaceAll("\\D", "");
+			cpfMasked = "###."+cpfOnlyNumber.substring(3, 6)+"."+cpfOnlyNumber.substring(7, 9)+"-##";
+		}else {
+			cpfMasked = "###."+cpf.substring(3, 6)+"."+cpf.substring(7, 9)+"-##";
+		}
+		return cpfMasked;
+	}
+
+	
+	public User genareteUser() {
+		User user = new User();
+		user.setName("Fagner");
+		user.setEmail("teste@email.com");
+		user.setId("1");
+		user.setUsername(hideCpf("893.690.290-36"));
+		
+		return user;
+	}
 	
 	public void saveOrUpdate(CadUserDTO cadUsuarioDto)throws Exception {
 		try {
+			Sentry.setUser(genareteUser());
+
 			if(!cadUsuarioDto.getSenha().matches("^(?=.*[!#@$%&])(?=.*[0-9])(?=.*[a-z]).{8,}$")) {
 				throw new ValidationException("invalidPassword");
 			}
 			CadUser userExists = repository.findByLogin(cadUsuarioDto.getLogin());
 	
-			System.out.println(userExists);
 			if(userExists != null) {
 				throw new ValidationException("UserExist");
 			}
@@ -63,6 +89,8 @@ public class CadUserService {
 	
 	public CadUser saveOrUpdate(CadUserDTO cadUsuarioDto, String login)throws Exception {
 		try {
+			Sentry.setUser(genareteUser());
+			
 			CadUser user = repository.findByLogin(login);
 			User userTeste = new User();
 			if(user == null) {
@@ -110,23 +138,24 @@ public class CadUserService {
 	
 	public void login(String login, String password)throws NotFoundException, InvalidContentTypeException, Exception {
 		try {
+			Sentry.setUser(genareteUser());
 
 			if(login.isBlank()|| password.isBlank()) {
 				throw new InvalidContentTypeException();
 			}
-		
 			if(repository.findByLoginAndSenha(login, password) == null) {
 				throw new NotFoundException();
 			}
+			
 		}catch(InvalidContentTypeException e) {
+			Sentry.captureException(e);
 			throw new InvalidContentTypeException(e.getMessage());
 		}catch(NotFoundException e) {
+			Sentry.captureException(e);
 			throw new NotFoundException();
 		}catch(Exception e) {
+			Sentry.captureException(e);
 			throw new Exception(e);
-
 		}
-		
 	}
-
 }
