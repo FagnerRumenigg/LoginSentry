@@ -72,8 +72,7 @@ public class CadUserController {
 	@GetMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginDTO loginDto){
 		try {
-			service.login(loginDto.getLogin(), loginDto.getSenha());
-			
+			service.login(loginDto);
 			return ResponseEntity.ok().build();
 		} catch (NotFoundException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

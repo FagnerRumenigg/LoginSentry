@@ -11,6 +11,7 @@ public interface CadUserRepository extends JpaRepository<CadUser,Integer>{
 
 	CadUser findByLogin(String login);
 	
-	CadUser findByLoginAndSenha(String login, String senha);
-	
+	CadUser findByCpfAndSenha(String login, String senha);
+
+	CadUser findByCpf(String cpf);
 }

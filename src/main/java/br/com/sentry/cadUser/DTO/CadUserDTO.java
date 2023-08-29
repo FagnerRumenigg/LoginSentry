@@ -24,5 +24,6 @@ public class CadUserDTO implements Serializable{
 	
 	private String senha;
 
-	private Boolean isDisabled;
+	private String cpf;
+	
 }
