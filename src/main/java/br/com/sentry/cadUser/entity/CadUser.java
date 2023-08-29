@@ -22,6 +22,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Getter @Setter
 @Entity
 @Table(name="cadusuarios")
 public class CadUser implements Serializable{
@@ -30,29 +31,24 @@ public class CadUser implements Serializable{
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Getter @Setter
 	@Column(name="idcadusuario")
 	private Integer idUsuario;
 	
-	@Getter @Setter
 	@Column(name="dcr_usuario")
 	private String usuario;
 	
-	@Getter @Setter
 	@Column(name="dcr_login")
 	private String login;
 	
-	@Getter @Setter
 	@Column(name="dcr_senha")
 	private String senha;
 
-	@Getter @Setter
+	@Column(name="cpf")
+	private String cpf;
+
 	@Column(name="dat_cadastro")
 	private LocalDate datCadastro;
 	
-	@Getter @Setter
-	@Column(name="dat_desativacao")
-	private LocalDate datDesativacao;
 	
 	private UserRoleEnum role;
 }
