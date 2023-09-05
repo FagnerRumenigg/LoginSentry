@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import br.com.sentry.enums.UserRoleEnum;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -48,7 +47,4 @@ public class CadUser implements Serializable{
 
 	@Column(name="dat_cadastro")
 	private LocalDate datCadastro;
-	
-	
-	private UserRoleEnum role;
 }

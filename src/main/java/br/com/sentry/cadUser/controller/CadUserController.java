@@ -36,9 +36,9 @@ public class CadUserController {
 	}
 
 	@PostMapping
-	public ResponseEntity<String> save(@RequestBody CadUserDTO cadUsuarioDto) {
+	public ResponseEntity<String> save(@RequestBody CadUserDTO dtoUsuario) {
 		try {
-			service.saveOrUpdate(cadUsuarioDto);
+			service.saveOrUpdate(dtoUsuario);
 			return ResponseEntity.status(HttpStatus.CREATED).build();
 		}catch(ValidationException e) {
 			if(e.getMessage().contains("invalidPassword")) {
@@ -54,9 +54,9 @@ public class CadUserController {
 	}
 	
 	@PutMapping("/{login}")
-	public ResponseEntity<CadUser> updateUsuario(@PathVariable String login, @RequestBody CadUserDTO cadUsuarioDto){
+	public ResponseEntity<CadUser> updateUsuario(@PathVariable String login, @RequestBody CadUserDTO dtoUsuario){
 		try {
-			return ResponseEntity.ok().body(service.saveOrUpdate(cadUsuarioDto, login));		
+			return ResponseEntity.ok().body(service.saveOrUpdate(dtoUsuario, login));		
 		} catch (Exception e) {
 			return ResponseEntity.internalServerError().build(); 
 		}
@@ -66,7 +66,7 @@ public class CadUserController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteUsuario(@PathVariable Integer id) {
 		service.deleteUser(id);
-		return ResponseEntity.ok().body("Deletado");
+		return ResponseEntity.ok().build();
 	}
 	
 	@GetMapping("/login")
