@@ -13,6 +13,7 @@ import lombok.ToString;
 @ToString
 @Getter @Setter
 public class LoginDTO {
+	
 	String login;
 	
 	String senha;

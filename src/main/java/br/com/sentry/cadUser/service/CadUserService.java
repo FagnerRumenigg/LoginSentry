@@ -90,19 +90,16 @@ public class CadUserService {
 		}
 	}
 	
-	public String getUrl() {
-		return "url";
-	}
-	
 	public CadUser saveOrUpdate(CadUserDTO cadUsuarioDto, String login)throws Exception {
 		try {
 			Sentry.setUser(genareteUser(cadUsuarioDto.getUsuario(), cadUsuarioDto.getCpf()));
 			
-			CadUser user = repository.findByLogin(login);
-			User userTeste = new User();
-			if(user == null) {
-				userTeste.setName("Fagner");
-				Sentry.setUser(userTeste);
+			CadUser cadastroUsuario = repository.findByLogin(login);
+			User usuarioTeste = new User();
+			
+			if(cadastroUsuario == null) {
+				usuarioTeste.setName("Teste");
+				Sentry.setUser(usuarioTeste);
 				throw new AccountNotFoundException("LoginNotFound");
 			}
 			
@@ -110,14 +107,13 @@ public class CadUserService {
 				throw new ValidationException("invalidPassword");
 			}
 			
+			cadastroUsuario.setUsuario(cadUsuarioDto.getUsuario());
+			cadastroUsuario.setLogin(cadUsuarioDto.getLogin());
+			cadastroUsuario.setSenha(cadUsuarioDto.getSenha());
+			cadastroUsuario.setCpf(cadUsuarioDto.getCpf());
+			cadastroUsuario.setDatCadastro(LocalDate.now());
 			
-			user.setUsuario(cadUsuarioDto.getUsuario());
-			user.setLogin(cadUsuarioDto.getLogin());
-			user.setSenha(cadUsuarioDto.getSenha());
-			user.setCpf(cadUsuarioDto.getCpf());
-			user.setDatCadastro(LocalDate.now());
-			
-			return repository.save(user);
+			return repository.save(cadastroUsuario);
 		}catch(Exception e) {
 			logger.error("Update: ",e);
 			throw new Exception(e);
@@ -128,7 +124,6 @@ public class CadUserService {
 		repository.flush();
 		return repository.findAll(Sort.by("idUsuario"));
 	}
-	
 	
 	public void deleteUser(Integer id) {
 		repository.deleteById(id);;
